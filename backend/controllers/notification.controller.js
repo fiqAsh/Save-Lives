@@ -36,3 +36,38 @@ export const sendNotifications = async (post) => {
     console.error("Error sending notifications:", error);
   }
 };
+export const getNotifications = async (req, res) => {
+  try {
+    const notifications = await Notification.find({ user: req.user._id })
+      .sort({ createdAt: -1 })
+      .populate("post", "description");
+
+    res.status(200).json(notifications);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Failed to get notifications", error: error.message });
+  }
+};
+
+//raz m2
+export const sendAdminNotification = async (bankRequest) => {
+  try {
+    // Find all admin users
+    const admins = await User.find({ role: "admin" });
+
+    if (admins.length === 0) return; // No admins found, no notifications needed
+
+    // Create notifications for all admins
+    const notifications = admins.map((admin) => ({
+      user: admin._id,
+      message: `New bank request for ${bankRequest.quantity} units of ${bankRequest.bloodgroup} blood at ${bankRequest.bank}.`,
+      post: bankRequest._id,
+    }));
+
+    // Save notifications to the database
+    await Notification.insertMany(notifications);
+  } catch (error) {
+    console.error("Error sending admin notifications:", error);
+  }
+};

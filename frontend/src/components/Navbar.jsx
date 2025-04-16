@@ -34,6 +34,16 @@ const Navbar = () => {
         Profile
       </button>
 
+      {/* Show admin button if user is an admin */}
+      {user?.user?.role === "admin" && (
+        <button
+          onClick={() => navigate("/adminpage")}
+          className="bg-red-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg hover:bg-red-700"
+        >
+          Admin Panel
+        </button>
+      )}
+
       <button
         onClick={handleLogout}
         className="bg-blue-500 text-white font-bold py-2 px-6 rounded-lg shadow-lg hover:bg-blue-600"

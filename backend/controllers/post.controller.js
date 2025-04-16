@@ -148,3 +148,31 @@ export const getPostStatusofUser = async (req, res) => {
       .json({ message: "Failed to fetch user posts", error: error.message });
   }
 };
+
+//cancelling a post
+//hjb m2
+export const cancelPost = async (req, res) => {
+  try {
+    const { postid } = req.params;
+    const post = await Post.findById(postid);
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    if (post.canceled) {
+      return res.status(400).json({ message: "Post already cancelled" });
+    }
+
+    post.canceled = true;
+    post.canceledAt = new Date();
+
+    await post.save();
+
+    res.status(200).json({ message: "Post cancelled successfully" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Failed to cancel post", error: error.message });
+  }
+};
