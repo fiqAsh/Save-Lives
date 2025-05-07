@@ -16,13 +16,24 @@ import messageRoute from "./routes/message.route.js";
 import notificationRoute from "./routes/notification.route.js";
 
 dotenv.config();
+
+// Get the directory name using import.meta.url (for ES modules)
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
+
 const app = express();
+
+// Serve static files from the frontend's dist directory
+app.use(express.static(path.join(__dirname, "../frontend/dist")));
+
 const server = http.createServer(app); // Use HTTP server
+
+// Set allowed origins for CORS based on the environment
 const allowedOrigins =
   process.env.NODE_ENV === "production"
     ? "https://save-lives-9yue.onrender.com"
     : "http://localhost:5173";
 
+// Initialize socket.io
 const io = new Server(server, {
   cors: {
     origin: allowedOrigins,
@@ -30,6 +41,7 @@ const io = new Server(server, {
   },
 });
 
+// Set up CORS
 app.use(
   cors({
     origin: allowedOrigins,
@@ -40,6 +52,7 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
+// Define API routes
 app.use("/api/auth", authRoute);
 app.use("/api/post", postRoute);
 app.use("/api/bank", bankRoute);
@@ -83,7 +96,7 @@ io.on("connection", (socket) => {
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
-  // Serve the index.html file on any other route
+  // Serve the index.html file for any other route (single-page app fallback)
   app.get("*", (req, res) => {
     res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
   });
